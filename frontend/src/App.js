@@ -5,7 +5,8 @@ import AnalyticsPage from './pages/AnalyticsPage';
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100">
+      <div className="bg-gray-100">
+      
     
         <Routes>
           <Route path="/" element={<Home />} />

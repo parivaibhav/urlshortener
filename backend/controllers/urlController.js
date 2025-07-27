@@ -47,3 +47,12 @@ exports.getAnalytics = async (req, res) => {
         res.status(500).json({ error: "Error fetching analytics" });
     }
 };
+
+exports.getTotalCount = async (req, res) => {
+    try {
+        const total = await Url.countDocuments();
+        res.status(200).json({ total });
+    } catch (err) {
+        res.status(500).json({ error: "Error getting total count" });
+    }
+};
