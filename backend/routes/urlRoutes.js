@@ -9,8 +9,8 @@ const {
 
 router.post('/shorten', shortenUrl);
 router.get('/analytics', getAnalytics);
-router.get('/:shortId', redirectUrl);
 router.get('/count', getTotalCount); // ✅ New route
+router.get('/:shortId', redirectUrl);
 
 
 module.exports = router;
