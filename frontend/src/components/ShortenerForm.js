@@ -90,7 +90,7 @@ function ShortenerForm() {
                         )}
                     </div>
 
-                    <div>
+                    {/* <div>
                         <input
                             type="text"
                             className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition ${errors.customAlias ? 'border-red-500' : 'border-gray-300'
@@ -102,7 +102,7 @@ function ShortenerForm() {
                         {errors.customAlias && (
                             <p className="text-red-500 text-sm mt-1">{errors.customAlias}</p>
                         )}
-                    </div>
+                    </div> */}
 
                     <button
                         type="submit"

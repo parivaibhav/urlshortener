@@ -1,21 +1,28 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import AnalyticsPage from './pages/AnalyticsPage';
+import SignIn from './pages/GoogleSignIn';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 function App() {
   return (
-    <Router>
-      <div className="bg-gray-100">
-      
-    
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
-        </Routes>
-       
-      </div>
-    </Router>
+    <GoogleOAuthProvider clientId="745227285656-mc3c6bcrvnfies8ri22ss452dj4rlpp2.apps.googleusercontent.com">
+      <Router>
+        <div className="bg-gray-100 min-h-screen">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/analytics"
+              element={
+                localStorage.getItem('token') ? <AnalyticsPage /> : <Navigate to="/signin" />
+              }
+            />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="*" element={<div className="text-center p-8">404 - Not Found</div>} />
+          </Routes>
+        </div>
+      </Router>
+    </GoogleOAuthProvider>
   );
 }
-
 export default App;
