@@ -4,27 +4,23 @@ import { motion } from 'framer-motion';
 
 function Analytics() {
     const [urls, setUrls] = useState([]);
-    const [page, setPage] = useState(1);
-    const [total, setTotal] = useState(0);
-    const limit = 5;
-
-    const fetchData = async () => {
-        try {
-            const res = await axios.get(
-                `https://urlshortener-vwzz.onrender.com/analytics?page=${page}&limit=${limit}`
-            );
-            setUrls(res.data.data);
-            setTotal(res.data.total);
-        } catch {
-            alert('❌ Failed to fetch analytics');
-        }
-    };
 
     useEffect(() => {
-        fetchData();
-    }, [page]);
+        const fetchData = async () => {
+            try {
+                const res = await axios.get('https://urlshortener-vwzz.onrender.com/analytics');
+                console.log("Analytics response:", res.data);
 
-    const totalPages = Math.ceil(total / limit);
+                setUrls(res.data); // ✅ Use res.data directly
+            } catch (err) {
+                alert('❌ Failed to fetch analytics');
+                console.error(err);
+                setUrls([]);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     return (
         <motion.div
@@ -53,7 +49,7 @@ function Analytics() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {urls.map((url) => (
+                        {Array.isArray(urls) && urls.map((url) => (
                             <motion.tr
                                 key={url._id}
                                 className="hover:bg-gray-50 transition"
@@ -74,13 +70,15 @@ function Analytics() {
                                 <td className="px-6 py-4 break-words whitespace-pre-wrap text-gray-700">
                                     {url.originalUrl}
                                 </td>
-                                <td className="px-6 py-4 text-center text-gray-900">{url.clicks}</td>
+                                <td className="px-6 py-4 text-center text-gray-900">
+                                    {url.clicks}
+                                </td>
                                 <td className="px-6 py-4 text-gray-500">
                                     {new Date(url.createdAt).toLocaleString()}
                                 </td>
                             </motion.tr>
                         ))}
-                        {urls.length === 0 && (
+                        {Array.isArray(urls) && urls.length === 0 && (
                             <tr>
                                 <td colSpan="4" className="text-center text-gray-400 px-6 py-10">
                                     No analytics data available yet.
@@ -89,25 +87,6 @@ function Analytics() {
                         )}
                     </tbody>
                 </motion.table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex justify-center mt-6 gap-2 text-sm">
-                <button
-                    disabled={page === 1}
-                    onClick={() => setPage((p) => p - 1)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-                >
-                    Prev
-                </button>
-                <span className="px-3 py-2">{`Page ${page} of ${totalPages}`}</span>
-                <button
-                    disabled={page === totalPages}
-                    onClick={() => setPage((p) => p + 1)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-                >
-                    Next
-                </button>
             </div>
         </motion.div>
     );

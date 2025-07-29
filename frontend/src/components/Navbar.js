@@ -2,6 +2,11 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { FaGithubAlt } from "react-icons/fa";
+import { BiLogoLinkedin } from "react-icons/bi";
+import { FiInstagram } from "react-icons/fi";
+
+
 
 function Navbar() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -32,12 +37,15 @@ function Navbar() {
                     🔗 Shortify
                 </Link>
 
-                {/* Conditional Analytics Link */}
-                {isLoggedIn && (
-                    <Link to="/analytics" className="text-sm text-gray-700 hover:text-blue-600">
-                        Analytics
-                    </Link>
-                )}
+           
+                <div className='flex gap-x-2'>
+                    <a href='https://github.com/parivaibhav' className='hover:text-blue-500'><FaGithubAlt /></a>
+                    <a href='https://www.linkedin.com/in/vaibhav-pari-399a88230' className='hover:text-blue-500'><BiLogoLinkedin /></a>
+                    <a href='https://www.instagram.com/vaibhhav87/' className='hover:text-blue-500'>  <FiInstagram /></a>
+                </div>
+
+
+
             </div>
         </motion.nav>
     );
