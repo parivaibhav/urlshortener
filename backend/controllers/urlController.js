@@ -11,7 +11,7 @@ exports.shortenUrl = async (req, res) => {
             if (exists) return res.status(400).json({ error: 'Custom alias already in use' });
         }
 
-    
+
 
         const shortId = customAlias || nanoid(8);
         const newUrl = new Url({ originalUrl, shortId });
@@ -26,16 +26,26 @@ exports.shortenUrl = async (req, res) => {
 exports.redirectUrl = async (req, res) => {
     try {
         const { shortId } = req.params;
-        const url = await Url.findOne({ shortId });
-        if (!url) return res.status(404).send('URL not found');
+        console.log("🔍 Redirect request received for shortId:", shortId);
 
+        const url = await Url.findOne({ shortId });
+
+        if (!url) {
+            console.log("❌ No matching URL in DB for:", shortId);
+            return res.status(404).send('URL not found');
+        }
+
+        console.log("✅ Found URL:", url.originalUrl);
         url.clicks++;
         await url.save();
+
         res.redirect(url.originalUrl);
-    } catch {
+    } catch (err) {
+        console.error("❌ Redirect error:", err);
         res.status(500).send('Redirect error');
     }
 };
+
 
 exports.getAnalytics = async (req, res) => {
     try {
