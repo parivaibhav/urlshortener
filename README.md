@@ -11,7 +11,7 @@ A full-stack **URL Shortener** web application built with **React + Tailwind CSS
 
 ## 🌐 Live Demo
 
-Live Demo: [urlshortener]([https://urlshortener-weld-nine.vercel.app/)  
+Live Demo: [https://urlshortener-weld-nine.vercel.app/](https://urlshortener-weld-nine.vercel.app/)  
 
 
 ---
