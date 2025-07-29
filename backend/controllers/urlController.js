@@ -56,6 +56,7 @@ exports.getAnalytics = async (req, res) => {
     }
 };
 
+
 exports.getTotalCount = async (req, res) => {
     try {
         const total = await Url.countDocuments();

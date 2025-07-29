@@ -1,21 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+// components/GuestCredits.jsx
 
-function GuestCredits({ onCreditsExhausted }) {
-    const [credits, setCredits] = useState(null);
+import React from 'react';
 
-    useEffect(() => {
-        axios.get('https://urlshortener-vwzz.onrender.com/api/guest/credits').then((res) => {
-            setCredits(res.data);
-            if (res.data.remaining <= 0) onCreditsExhausted?.();
-        });
-    }, [onCreditsExhausted]);
-
-    if (!credits) return null;
+function GuestCredits({ guestCredits }) {
+    if (!guestCredits) return null;
 
     return (
-        <div className="text-sm text-gray-500 mt-3">
-            Guest usage: {credits.used} / {credits.max} credits used
+        <div className="text-sm text-gray-500 mt-3 text-center">
+            Guest usage: {guestCredits.used} / {guestCredits.max} credits used
         </div>
     );
 }

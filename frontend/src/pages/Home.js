@@ -4,6 +4,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import GuestCredits from '../components/GuestCredits';
 import { getGuestCreditsUsed, incrementGuestCredits } from '../utils/guestCredits';
+import Navbar from '../components/Navbar';
 
 const MAX_GUEST_CREDITS = 5;
 
@@ -14,45 +15,31 @@ function Home() {
   const [isGuestLimitReached, setIsGuestLimitReached] = useState(false);
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
+  const [guestCredits, setGuestCredits] = useState({ used: getGuestCreditsUsed(), max: MAX_GUEST_CREDITS });
 
   const isLoggedIn = !!(token && user);
 
-  // ✅ Debug Logs
-  useEffect(() => {
-    console.log('🔄 Rendered');
-    console.log('➡ Token:', token);
-    console.log('➡ User:', user);
-    console.log('➡ isLoggedIn:', isLoggedIn);
-    console.log('➡ Guest Credits Used:', getGuestCreditsUsed());
-    console.log('➡ isGuestLimitReached:', isGuestLimitReached);
-  });
-
-  // ✅ Load token from localStorage on mount
   useEffect(() => {
     const localToken = localStorage.getItem('token');
     if (localToken) {
       try {
         const decoded = jwtDecode(localToken);
-        console.log('✅ Loaded token from localStorage');
         setToken(localToken);
         setUser(decoded);
         localStorage.removeItem('guestCredits');
         setIsGuestLimitReached(false);
-      } catch (err) {
-        console.error('❌ Invalid token');
+      } catch {
         localStorage.removeItem('token');
       }
     } else {
-      if (getGuestCreditsUsed() >= MAX_GUEST_CREDITS) {
-        setIsGuestLimitReached(true);
-      }
+      const used = getGuestCreditsUsed();
+      setGuestCredits({ used, max: MAX_GUEST_CREDITS });
+      setIsGuestLimitReached(used >= MAX_GUEST_CREDITS);
     }
   }, []);
 
-  // ✅ Sync guest credit state if login status changes
   useEffect(() => {
     if (token && user) {
-      console.log('✅ User is logged in, disabling guest limit');
       setIsGuestLimitReached(false);
     } else {
       const used = getGuestCreditsUsed();
@@ -64,7 +51,6 @@ function Home() {
     if (!originalUrl) return;
 
     if (!isLoggedIn && getGuestCreditsUsed() >= MAX_GUEST_CREDITS) {
-      console.warn('🚫 Guest limit reached');
       setIsGuestLimitReached(true);
       return;
     }
@@ -78,12 +64,13 @@ function Home() {
       setShortUrl(res.data.shortUrl);
       setOriginalUrl('');
       setCopied(false);
+
       if (!isLoggedIn) {
         incrementGuestCredits();
-        console.log('🔢 Incremented guest credit:', getGuestCreditsUsed());
+        const used = getGuestCreditsUsed();
+        setGuestCredits({ used, max: MAX_GUEST_CREDITS });
       }
     } catch (err) {
-      console.error('❌ Shorten error:', err.response?.data?.error || err.message);
       alert(err.response?.data?.error || 'Shorten failed');
     }
   };
@@ -91,13 +78,10 @@ function Home() {
   const handleCopy = () => {
     navigator.clipboard.writeText(shortUrl);
     setCopied(true);
-    console.log('📋 Copied:', shortUrl);
   };
 
   const handleLogout = () => {
-    console.log('🔚 Logging out');
     localStorage.removeItem('token');
-    // Keep guestCredits intact
     setToken(null);
     setUser(null);
     window.location.reload();
@@ -105,7 +89,8 @@ function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center px-4 py-10">
-      <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
+      <Navbar />
+      <div className="bg-white p-6 mt-52 rounded shadow-md w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-bold">URL Shortener</h1>
           {isLoggedIn && (
@@ -134,8 +119,7 @@ function Home() {
         <button
           onClick={handleShorten}
           disabled={!isLoggedIn && isGuestLimitReached}
-          className={`w-full p-2 text-white rounded ${!isLoggedIn && isGuestLimitReached ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
-            }`}
+          className={`w-full p-2 text-white rounded ${!isLoggedIn && isGuestLimitReached ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
         >
           Shorten URL
         </button>
@@ -151,42 +135,30 @@ function Home() {
 
         {!isLoggedIn && (
           <>
-            <GuestCredits onCreditsExhausted={() => setIsGuestLimitReached(true)} />
+            <GuestCredits guestCredits={guestCredits} onCreditsExhausted={() => setIsGuestLimitReached(true)} />
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600 mb-2">Sign in with Google for unlimited usage:</p>
               <GoogleLogin
                 onSuccess={async (response) => {
                   const googleToken = response.credential;
-
                   try {
                     const res = await axios.post('https://urlshortener-vwzz.onrender.com/api/auth/google-login', {
                       credential: googleToken,
                     });
-
                     const appJwt = res.data.token;
-                    const decoded = jwtDecode(appJwt); // 👈 decode YOUR app's JWT now
-
+                    const decoded = jwtDecode(appJwt);
                     setToken(appJwt);
                     setUser(decoded);
                     localStorage.setItem('token', appJwt);
                     localStorage.removeItem('guestCredits');
                     setIsGuestLimitReached(false);
-
-                    console.log('✅ App login success');
-                    console.log('User:', decoded);
-
-                    setTimeout(() => window.location.reload(), 300); // optional
-                  } catch (err) {
-                    console.error('❌ Google login failed:', err.message);
+                    setTimeout(() => window.location.reload(), 300);
+                  } catch {
                     alert('Login failed');
                   }
                 }}
-                onError={() => {
-                  console.error('❌ Google Login UI failed');
-                  alert('Login failed');
-                }}
+                onError={() => alert('Login failed')}
               />
-
             </div>
           </>
         )}

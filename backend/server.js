@@ -8,7 +8,17 @@ const guestRoutes = require('./routes/guestRoutes');
 const authRoutes = require('./routes/authRoutes');
 
 const app = express();
-app.use(cors());
+const allowedOrigins = ['https://urlshortener-mu-ashy.vercel.app', 'http://localhost:3000'];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS Not Allowed'));
+    }
+  },
+  credentials: true,
+}));
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI)

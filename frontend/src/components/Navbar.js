@@ -1,7 +1,24 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 function Navbar() {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                jwtDecode(token); // will throw if invalid
+                setIsLoggedIn(true);
+            } catch {
+                localStorage.removeItem('token');
+                setIsLoggedIn(false);
+            }
+        }
+    }, []);
+
     return (
         <motion.nav
             className="w-full px-4 py-3 bg-white shadow-md fixed top-0 left-0 z-50"
@@ -15,21 +32,12 @@ function Navbar() {
                     🔗 Shortify
                 </Link>
 
-                {/* Nav Links */}
-                <div className="flex items-center gap-4 text-sm">
-                    <Link
-                        to="/signin"
-                        className="text-gray-700 hover:text-blue-600 transition font-medium"
-                    >
-                        Sign In
+                {/* Conditional Analytics Link */}
+                {isLoggedIn && (
+                    <Link to="/analytics" className="text-sm text-gray-700 hover:text-blue-600">
+                        Analytics
                     </Link>
-                    <Link
-                        to="/signup"
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium"
-                    >
-                        Sign Up
-                    </Link>
-                </div>
+                )}
             </div>
         </motion.nav>
     );
