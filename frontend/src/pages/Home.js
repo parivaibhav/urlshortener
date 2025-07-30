@@ -120,7 +120,7 @@ function Home() {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-bold text-gray-800">🔗 URL Shortener</h1>
           {isLoggedIn && (
-            <button onClick={handleLogout} className="text-sm text-red-600 text-xl">
+            <button onClick={handleLogout} className=" text-red-600 text-xl">
               <IoLogOutOutline />
             </button>
           )}
@@ -216,7 +216,7 @@ function Home() {
           </div>
 
         )}
-        <div className='mt-2 text-center text-[11px] text-gray-500 text-right'>Made by Vaibhav Pari</div>
+        <div className='mt-2  text-[11px] text-gray-500 text-right'>Made by Vaibhav Pari</div>
       </div>
     </div>
   );
