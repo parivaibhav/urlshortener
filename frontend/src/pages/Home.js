@@ -6,6 +6,8 @@ import GuestCredits from '../components/GuestCredits';
 import { getGuestCreditsUsed, incrementGuestCredits } from '../utils/guestCredits';
 import Navbar from '../components/Navbar';
 import { IoLogOutOutline } from "react-icons/io5";
+import CustomSpinner from '../components/CustomSpinner';
+import { TbLock } from "react-icons/tb";
 
 
 const MAX_GUEST_CREDITS = 5;
@@ -19,6 +21,7 @@ function Home() {
   const [user, setUser] = useState(null);
   const [guestCredits, setGuestCredits] = useState({ used: getGuestCreditsUsed(), max: MAX_GUEST_CREDITS });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // NEW
 
   const isValidUrl = (url) => {
     const regex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/i;
@@ -72,6 +75,7 @@ function Home() {
     }
 
     try {
+      setLoading(true); // START SPINNER
       const res = await axios.post(
         'https://urlshortener-vwzz.onrender.com/api/shorten',
         { originalUrl },
@@ -90,6 +94,8 @@ function Home() {
       }
     } catch (err) {
       alert(err.response?.data?.error || 'Shorten failed');
+    } finally {
+      setLoading(false); // STOP SPINNER
     }
   };
 
@@ -106,22 +112,23 @@ function Home() {
   };
 
   return (
-    <div className=" bg-gray-50 flex flex-col items-center  py-10 ">
+    <div className="bg-gray-50 flex flex-col items-center py-10">
+      {loading && <CustomSpinner />} {/* Show loading overlay */}
+
       <Navbar />
       <div className="bg-white p-6 mt-32 rounded-xl shadow-xl w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-bold text-gray-800">🔗 URL Shortener</h1>
           {isLoggedIn && (
             <button onClick={handleLogout} className="text-sm text-red-600 text-xl">
-            <IoLogOutOutline />
-
+              <IoLogOutOutline />
             </button>
           )}
         </div>
 
         {isLoggedIn && user && (
           <div className="flex items-center gap-2 mb-4">
-            <img src={user.picture} alt="profile" className="w-8 h-8 rounded-full border" />
+            <img src={user.picture || "avatar.jpg"} alt="profile" className="w-8 h-8 rounded-full border" />
             <p className="text-sm text-gray-600">Welcome, {user.name}</p>
           </div>
         )}
@@ -136,14 +143,13 @@ function Home() {
             }}
             type="url"
             id="urlInput"
-            placeholder="ex. https://www.example.com/products/electronics/laptops?brand=apple&model=macbook-pro-2024&ref=homepage-banner&utm_campaign=summer-sale&utm_medium=email"
+            placeholder="ex. https://example.com/?utm_campaign=summer-sale"
             disabled={!isLoggedIn && isGuestLimitReached}
             className={`peer w-full px-3 py-2 border rounded focus:outline-none transition-all ${error
               ? 'border-red-500'
               : 'border-gray-300 focus:ring-2 focus:ring-blue-400'
               }`}
           />
-
           {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
         </div>
 
@@ -161,10 +167,7 @@ function Home() {
         {shortUrl && (
           <div className="mt-4 text-sm bg-gray-100 p-3 rounded flex items-center justify-between">
             <span className="text-green-700 truncate">{shortUrl}</span>
-            <button
-              onClick={handleCopy}
-              className="ml-2 text-blue-600 underline text-xs"
-            >
+            <button onClick={handleCopy} className="ml-2 text-blue-600 underline text-xs">
               {copied ? 'Copied!' : 'Copy'}
             </button>
           </div>
@@ -182,6 +185,7 @@ function Home() {
                 onSuccess={async (response) => {
                   const googleToken = response.credential;
                   try {
+                    setLoading(true); // START SPINNER
                     const res = await axios.post('https://urlshortener-vwzz.onrender.com/api/auth/google-login', {
                       credential: googleToken,
                     });
@@ -195,6 +199,8 @@ function Home() {
                     setTimeout(() => window.location.reload(), 300);
                   } catch {
                     alert('Login failed');
+                  } finally {
+                    setLoading(false); // STOP SPINNER
                   }
                 }}
                 onError={() => alert('Login failed')}
@@ -204,16 +210,14 @@ function Home() {
         )}
 
         {!isLoggedIn && isGuestLimitReached && (
-          <div className="mt-4 text-yellow-700 bg-yellow-100 p-2 rounded text-center">
-            🚫 Guest limit reached. Sign in to continue.
+          <div className="mt-4 text-yellow-700 bg-yellow-100 p-2 rounded text-center flex items-center justify-center gap-2">
+            <TbLock className="text-xl" />
+            <span>Guest limit reached. Sign in to continue.</span>
           </div>
+
         )}
         <div className='mt-2 text-center text-[11px] text-gray-500 text-right'>Made by Vaibhav Pari</div>
       </div>
-
-
-
-
     </div>
   );
 }
